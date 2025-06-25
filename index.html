@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ha-Meem Textile Zone | Digital Reporting</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    nav {
+      width: 100%;
+      background-color: #222;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .button-container, .unit-buttons, .tab-buttons {
+      margin: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    button, .tab {
+      background-color: #4caf50;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 22px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover, .tab:hover {
+      background-color: #388e3c;
+    }
+    .tab.active {
+      background-color: #1e88e5;
+    }
+    iframe {
+      width: 95vw;
+      height: 80vh;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,255,0,0.7);
+      margin: 20px 0;
+    }
+    #floatingBackBtn {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background-color: #4caf50;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 2000;
+      transition: background-color 0.3s;
+      display: none;
+    }
+    #floatingBackBtn:hover {
+      background-color: #388e3c;
+    }
+    h1 {
+      margin-top: 20px;
+      color: #ffc107;
+      text-align: center;
+    }
+    /* Login screen */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #1a1a1a;
+      z-index: 3000;
+    }
+    #login-screen input {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+      width: 250px;
+    }
+    #login-screen button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #login-screen p {
+      color: tomato;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<nav>📊 Ha-Meem Textile Zone | Digital Reporting System</nav>
+
+<!-- Login Screen -->
+<div id="login-screen">
+  <h2 style="color:white; margin-bottom:20px;">🔐 Ha-Meem Textile Zone</h2>
+  <input id="username" placeholder="Username" />
+  <input id="password" type="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <p id="login-error"></p>
+</div>
+
+<!-- Home Unit Selection -->
+<div id="home-view" style="display: none;">
+  <h1>Select a Unit</h1>
+  <div class="unit-buttons">
+    <button onclick="showUnit('denim')">👖 Denim</button>
+    <button onclick="showUnit('textile')">🧵 Textile</button>
+    <button onclick="showUnit('spinning')">🧶 Spinning</button>
+    <button onclick="showUnit('rotor')">🔄 Rotor</button>
+    <button onclick="showUnit('recycle')">♻️ Recycle</button>
+  </div>
+</div>
+
+<!-- Report View -->
+<div id="report-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="unit-title"></h1>
+  <div class="tab-buttons">
+    <div class="tab" onclick="loadReport(currentUnit, 'production', this)">🏭 Production</div>
+    <div class="tab" onclick="loadReport(currentUnit, 'manpower', this)">👨‍🏭 Manpower</div>
+    <div class="tab" onclick="loadReport(currentUnit, 'stock', this)">📦 Stock</div>
+  </div>
+  <iframe id="report-frame"
+          allowfullscreen
+          sandbox="allow-same-origin allow-scripts allow-popups allow-storage-access-by-user-activation">
+  </iframe>
+</div>
+
+<!-- Floating Back Button -->
+<button id="floatingBackBtn" onclick="backToHome()">🔙 Back to Home</button>
+
+<script>
+  let currentUnit = '';
+
+  const reportURLs = {
+    production: {
+      denim: 'https://lookerstudio.google.com/embed/reporting/dd113d66-d94c-4aaf-a6f0-2379d08f6086/page/p_8kylhg96od',
+      textile: 'https://lookerstudio.google.com/embed/reporting/a7657409-ddb4-492f-a14d-caad44c3590f/page/p_nr13f7y6od',
+      spinning: 'https://lookerstudio.google.com/embed/reporting/67f6efad-80f9-4880-b055-1ea4d92909bd/page/VKJlE',
+      rotor: 'https://lookerstudio.google.com/embed/reporting/6e85c9c5-36f9-4e2f-b629-00cafc96f841/page/VKJlE',
+      recycle: ''
+    },
+    manpower: 'https://lookerstudio.google.com/embed/reporting/a3d59acc-9783-4e6d-868b-4a0b67ae6b61/page/p_rhi416b8rd',
+    stock: 'https://lookerstudio.google.com/embed/reporting/2482ac5e-fe5f-4427-9c2f-5ec726c868ca/page/p_7zfn5895rd'
+  };
+
+  function showUnit(unit) {
+    currentUnit = unit;
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('report-view').style.display = 'flex';
+    document.getElementById('unit-title').textContent = getUnitTitle(unit);
+    document.getElementById('floatingBackBtn').style.display = 'block';
+    const firstTab = document.querySelector('.tab-buttons .tab');
+    loadReport(unit, 'production', firstTab);
+  }
+
+  function loadReport(unit, type, element) {
+    const iframe = document.getElementById('report-frame');
+    if (type === 'manpower' || type === 'stock') {
+      iframe.src = reportURLs[type];
+    } else {
+      iframe.src = reportURLs[type][unit] || '';
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    if (element) element.classList.add('active');
+  }
+
+  function backToHome() {
+    document.getElementById('report-frame').src = '';
+    document.getElementById('report-view').style.display = 'none';
+    document.getElementById('home-view').style.display = 'block';
+    document.getElementById('floatingBackBtn').style.display = 'none';
+  }
+
+  function getUnitTitle(unit) {
+    switch (unit) {
+      case 'denim': return '👖 Ha-Meem Denim Ltd';
+      case 'textile': return '🧵 Ha-Meem Textile Ltd';
+      case 'spinning': return '🧶 Ha-Meem Spinning Ltd';
+      case 'rotor': return '🔄 Ha-Meem Rotor Ltd';
+      case 'recycle': return '♻️ Ha-Meem Recycle Ltd';
+      default: return 'Ha-Meem Reports';
+    }
+  }
+
+  function login() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    if (user === 'HTZ' && pass === '1230') {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('home-view').style.display = 'block';
+    } else {
+      document.getElementById('login-error').innerText = 'Invalid username or password';
+    }
+  }
+</script>
+
+</body>
+</html>
