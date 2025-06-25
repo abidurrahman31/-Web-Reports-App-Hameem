@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ha-Meem Textile Zone | Digital Reporting</title>
+  <title>Ha-Meem Textile Zone | Digital Reporting System</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -77,12 +77,28 @@
     #floatingBackBtn:hover {
       background-color: #388e3c;
     }
+    #logoutBtn {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      background-color: #e91e63;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 2000;
+      display: none;
+    }
+    #logoutBtn:hover {
+      background-color: #c2185b;
+    }
     h1 {
       margin-top: 20px;
       color: #ffc107;
       text-align: center;
     }
-    /* Login screen */
     #login-screen {
       display: flex;
       flex-direction: column;
@@ -125,14 +141,15 @@
 
 <!-- Login Screen -->
 <div id="login-screen">
-  <h2 style="color:white; margin-bottom:20px;">🔐 Ha-Meem Textile Zone</h2>
+  <h2 style="color:white; margin-bottom:10px;">🔐 Ha-Meem Textile Zone</h2>
+  <h3 style="color: #ccc; margin-bottom: 20px;">Digital Reporting System</h3>
   <input id="username" placeholder="Username" />
   <input id="password" type="password" placeholder="Password" />
   <button onclick="login()">Login</button>
   <p id="login-error"></p>
 </div>
 
-<!-- Home Unit Selection -->
+<!-- Home View -->
 <div id="home-view" style="display: none;">
   <h1>Select a Unit</h1>
   <div class="unit-buttons">
@@ -152,14 +169,12 @@
     <div class="tab" onclick="loadReport(currentUnit, 'manpower', this)">👨‍🏭 Manpower</div>
     <div class="tab" onclick="loadReport(currentUnit, 'stock', this)">📦 Stock</div>
   </div>
-  <iframe id="report-frame"
-          allowfullscreen
-          sandbox="allow-same-origin allow-scripts allow-popups allow-storage-access-by-user-activation">
-  </iframe>
+  <iframe id="report-frame" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-storage-access-by-user-activation"></iframe>
 </div>
 
-<!-- Floating Back Button -->
+<!-- Floating Buttons -->
 <button id="floatingBackBtn" onclick="backToHome()">🔙 Back to Home</button>
+<button id="logoutBtn" onclick="logout()">🚪 Logout</button>
 
 <script>
   let currentUnit = '';
@@ -222,9 +237,22 @@
     if (user === 'HTZ' && pass === '1230') {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('home-view').style.display = 'block';
+      document.getElementById('logoutBtn').style.display = 'block';
     } else {
       document.getElementById('login-error').innerText = 'Invalid username or password';
     }
+  }
+
+  function logout() {
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('login-error').innerText = '';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('report-view').style.display = 'none';
+    document.getElementById('report-frame').src = '';
+    document.getElementById('floatingBackBtn').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'none';
   }
 </script>
 
