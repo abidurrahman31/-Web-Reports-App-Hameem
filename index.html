@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ha-Meem Textile Zone | Digital Reporting System</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #1a1a1a;
+      background: #121212;
       color: white;
-      margin: 0;
-      padding: 0;
+      min-height: 100vh;
     }
     nav {
       width: 100%;
@@ -24,7 +24,7 @@
       top: 0;
       z-index: 1000;
     }
-    .unit-buttons, .tab-buttons {
+    .button-container, .unit-buttons, .tab-buttons {
       margin: 20px;
       display: flex;
       flex-wrap: wrap;
@@ -41,11 +41,11 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-    .tab.active {
-      background-color: #1e88e5;
-    }
     button:hover, .tab:hover {
       background-color: #388e3c;
+    }
+    .tab.active {
+      background-color: #1e88e5;
     }
     iframe {
       width: 95vw;
@@ -53,29 +53,33 @@
       border: none;
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0,255,0,0.7);
-      margin: 20px auto;
-      display: block;
-    }
-    #loading {
-      text-align: center;
-      font-size: 18px;
-      color: #ccc;
       margin: 20px 0;
+      display: none;
     }
-    .top-buttons {
+    #loader {
+      margin: 40px auto;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4caf50;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .action-buttons {
       display: flex;
       justify-content: space-between;
-      padding: 10px 20px;
+      margin: 15px 25px 0 25px;
       flex-wrap: wrap;
     }
-    #logoutBtn {
-      background-color: #c62828;
+    .action-buttons button {
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 6px;
     }
-    #logoutBtn:hover {
-      background-color: #b71c1c;
-    }
-
-    /* Login Screen */
     #login-screen {
       display: flex;
       flex-direction: column;
@@ -90,6 +94,8 @@
       border-radius: 5px;
       border: none;
       font-size: 16px;
+      width: 80%;
+      max-width: 300px;
     }
     #login-screen button {
       padding: 10px 20px;
@@ -98,120 +104,149 @@
       border-radius: 8px;
       color: white;
       font-size: 16px;
+      margin-top: 10px;
     }
     #login-error {
       color: tomato;
       margin-top: 15px;
     }
-
-    @media screen and (max-width: 768px) {
-      .unit-buttons, .tab-buttons {
-        flex-direction: column;
-        gap: 10px;
-      }
+    @media (max-width: 768px) {
       button, .tab {
         width: 90%;
-        max-width: 300px;
-        font-size: 14px;
-        padding: 12px 16px;
+        font-size: 15px;
       }
-      .top-buttons {
+      .action-buttons {
         flex-direction: column;
         align-items: center;
         gap: 10px;
-      }
-      nav {
-        font-size: 18px;
-      }
-      iframe {
-        height: 70vh;
       }
     }
   </style>
 </head>
 <body>
 
-<!-- Login Screen -->
 <div id="login-screen">
-  <h2>🔐 Ha-Meem Textile Zone | Digital Reporting System</h2>
+  <h2 style="color:white; margin-bottom:20px;">📊 Ha-Meem Textile Zone | Digital Reporting System</h2>
   <input id="username" placeholder="Username" />
   <input id="password" type="password" placeholder="Password" />
   <button onclick="login()">Login</button>
   <p id="login-error"></p>
 </div>
 
-<!-- Main Dashboard -->
-<div id="main-app" style="display: none;">
+<div id="main-app" style="display:none;">
   <nav>📊 Ha-Meem Textile Zone | Digital Reporting System</nav>
-
-  <div class="top-buttons">
-    <button id="logoutBtn" onclick="logout()">🚪 Logout</button>
-    <button onclick="backToHome()">🔙 Back to Home</button>
+  <div class="action-buttons">
+    <button onclick="logout()" style="background-color:#c62828;">📕 Logout</button>
+    <button onclick="backToHome()" style="background-color:#2e7d32;">🔙 Back to Home</button>
   </div>
 
   <div id="home-view">
-    <h1 style="text-align:center; color:#ffc107;">👖 Ha-Meem Denim Ltd</h1>
+    <h1 style="text-align:center; color:#ffc107; margin-top:20px;">Select a Unit</h1>
     <div class="unit-buttons">
-      <button onclick="showReport('production')">🏭 Production</button>
-      <button onclick="showReport('manpower')">👨‍🏭 Manpower</button>
-      <button onclick="showReport('stock')">📦 Stock</button>
+      <button onclick="showUnit('denim')">👖 Denim</button>
+      <button onclick="showUnit('textile')">🧵 Textile</button>
+      <button onclick="showUnit('spinning')">🧶 Spinning</button>
+      <button onclick="showUnit('rotor')">🔄 Rotor</button>
+      <button onclick="showUnit('recycle')">♻️ Recycle</button>
     </div>
   </div>
 
-  <div id="report-view" style="display:none;">
-    <div class="tab-buttons"></div>
-    <div id="loading">⏳ Loading report, please wait...</div>
-    <iframe id="report-frame" src=""></iframe>
+  <div id="report-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+    <h1 id="unit-title"></h1>
+    <div class="tab-buttons">
+      <div class="tab" onclick="loadReport(currentUnit, 'production', this)">🏭 Production</div>
+      <div class="tab" onclick="loadReport(currentUnit, 'manpower', this)">👨‍🏭 Manpower</div>
+      <div class="tab" onclick="loadReport(currentUnit, 'stock', this)">📦 Stock</div>
+    </div>
+    <div id="loader"></div>
+    <iframe id="report-frame"></iframe>
   </div>
 </div>
 
 <script>
-  const credentials = { username: "HTZ", password: "1230" };
+  let currentUnit = '';
+  const correctUsername = "HTZ";
+  const correctPassword = "1230";
+
+  const reportURLs = {
+    production: {
+      denim: 'https://lookerstudio.google.com/embed/reporting/dd113d66-d94c-4aaf-a6f0-2379d08f6086/page/p_8kylhg96od',
+      textile: 'https://lookerstudio.google.com/embed/reporting/a7657409-ddb4-492f-a14d-caad44c3590f/page/p_nr13f7y6od',
+      spinning: 'https://lookerstudio.google.com/embed/reporting/67f6efad-80f9-4880-b055-1ea4d92909bd/page/VKJlE',
+      rotor: 'https://lookerstudio.google.com/embed/reporting/6e85c9c5-36f9-4e2f-b629-00cafc96f841/page/VKJlE',
+      recycle: ''
+    },
+    manpower: 'https://lookerstudio.google.com/embed/reporting/a3d59acc-9783-4e6d-868b-4a0b67ae6b61/page/p_rhi416b8rd',
+    stock: 'https://lookerstudio.google.com/embed/reporting/2482ac5e-fe5f-4427-9c2f-5ec726c868ca/page/p_7zfn5895rd'
+  };
 
   function login() {
-    const user = document.getElementById("username").value;
-    const pass = document.getElementById("password").value;
-    if (user === credentials.username && pass === credentials.password) {
-      document.getElementById("login-screen").style.display = "none";
-      document.getElementById("main-app").style.display = "block";
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    if (user === correctUsername && pass === correctPassword) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
     } else {
-      document.getElementById("login-error").innerText = "❌ Invalid login credentials.";
+      document.getElementById('login-error').textContent = "❌ Invalid username or password.";
     }
   }
 
   function logout() {
-    document.getElementById("main-app").style.display = "none";
-    document.getElementById("login-screen").style.display = "flex";
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("login-error").innerText = "";
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('report-frame').src = '';
   }
 
-  function showReport(type) {
-    document.getElementById("home-view").style.display = "none";
-    document.getElementById("report-view").style.display = "block";
-    document.getElementById("loading").style.display = "block";
+  function showUnit(unit) {
+    currentUnit = unit;
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('report-view').style.display = 'flex';
+    document.getElementById('unit-title').textContent = getUnitTitle(unit);
+    const firstTab = document.querySelector('.tab-buttons .tab');
+    loadReport(unit, 'production', firstTab);
+  }
 
-    const urls = {
-      production: "https://lookerstudio.google.com/embed/reporting/dd113d66-d94c-4aaf-a6f0-2379d08f6086/page/p_8kylhg96od",
-      manpower: "https://lookerstudio.google.com/embed/reporting/a3d59acc-9783-4e6d-868b-4a0b67ae6b61/page/p_rhi416b8rd",
-      stock: "https://lookerstudio.google.com/embed/reporting/2482ac5e-fe5f-4427-9c2f-5ec726c868ca/page/p_7zfn5895rd"
-    };
+  function loadReport(unit, type, element) {
+    const iframe = document.getElementById('report-frame');
+    const loader = document.getElementById('loader');
+    iframe.style.display = 'none';
+    loader.style.display = 'block';
 
-    const iframe = document.getElementById("report-frame");
-    iframe.style.display = "none";
-    iframe.src = urls[type];
+    setTimeout(() => {
+      if (type === 'manpower' || type === 'stock') {
+        iframe.src = reportURLs[type];
+      } else {
+        iframe.src = reportURLs[type][unit] || '';
+      }
+    }, 300);
 
     iframe.onload = () => {
-      document.getElementById("loading").style.display = "none";
-      iframe.style.display = "block";
+      loader.style.display = 'none';
+      iframe.style.display = 'block';
     };
+
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    if (element) element.classList.add('active');
   }
 
   function backToHome() {
-    document.getElementById("report-frame").src = "";
-    document.getElementById("report-view").style.display = "none";
-    document.getElementById("home-view").style.display = "block";
+    document.getElementById('report-frame').src = '';
+    document.getElementById('report-view').style.display = 'none';
+    document.getElementById('home-view').style.display = 'block';
+  }
+
+  function getUnitTitle(unit) {
+    switch (unit) {
+      case 'denim': return '👖 Ha-Meem Denim Ltd';
+      case 'textile': return '🧵 Ha-Meem Textile Ltd';
+      case 'spinning': return '🧶 Ha-Meem Spinning Ltd';
+      case 'rotor': return '🔄 Ha-Meem Rotor Ltd';
+      case 'recycle': return '♻️ Ha-Meem Recycle Ltd';
+      default: return 'Ha-Meem Reports';
+    }
   }
 </script>
 
