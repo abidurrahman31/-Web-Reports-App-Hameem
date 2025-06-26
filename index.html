@@ -133,13 +133,30 @@
       color: tomato;
       margin-top: 15px;
     }
+
+    #loading-message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #aaa;
+      text-align: center;
+      display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+      iframe {
+        height: 70vh;
+      }
+      button, .tab {
+        font-size: 15px;
+        padding: 12px 18px;
+      }
+    }
   </style>
 </head>
 <body>
 
 <nav>📊 Ha-Meem Textile Zone | Digital Reporting System</nav>
 
-<!-- Login Screen -->
 <div id="login-screen">
   <h2 style="color:white; margin-bottom:10px;">🔐 Ha-Meem Textile Zone</h2>
   <h3 style="color: #ccc; margin-bottom: 20px;">Digital Reporting System</h3>
@@ -149,7 +166,6 @@
   <p id="login-error"></p>
 </div>
 
-<!-- Home View -->
 <div id="home-view" style="display: none;">
   <h1>Select a Unit</h1>
   <div class="unit-buttons">
@@ -161,7 +177,6 @@
   </div>
 </div>
 
-<!-- Report View -->
 <div id="report-view" style="display: none; flex-direction: column; align-items: center; width: 100%;">
   <h1 id="unit-title"></h1>
   <div class="tab-buttons">
@@ -169,10 +184,10 @@
     <div class="tab" onclick="loadReport(currentUnit, 'manpower', this)">👨‍🏭 Manpower</div>
     <div class="tab" onclick="loadReport(currentUnit, 'stock', this)">📦 Stock</div>
   </div>
-  <iframe id="report-frame" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-storage-access-by-user-activation"></iframe>
+  <div id="loading-message">⏳ Loading report… Please wait</div>
+  <iframe id="report-frame" style="display:none;" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-storage-access-by-user-activation"></iframe>
 </div>
 
-<!-- Floating Buttons -->
 <button id="floatingBackBtn" onclick="backToHome()">🔙 Back to Home</button>
 <button id="logoutBtn" onclick="logout()">🚪 Logout</button>
 
@@ -203,14 +218,25 @@
 
   function loadReport(unit, type, element) {
     const iframe = document.getElementById('report-frame');
-    if (type === 'manpower' || type === 'stock') {
-      iframe.src = reportURLs[type];
-    } else {
-      iframe.src = reportURLs[type][unit] || '';
-    }
+    const loading = document.getElementById('loading-message');
 
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     if (element) element.classList.add('active');
+
+    loading.style.display = 'block';
+    iframe.style.display = 'none';
+
+    let url = (type === 'manpower' || type === 'stock') ? reportURLs[type] : reportURLs[type][unit] || '';
+    iframe.src = '';
+
+    setTimeout(() => {
+      iframe.src = url;
+    }, 300); // slight delay before load
+
+    iframe.onload = () => {
+      loading.style.display = 'none';
+      iframe.style.display = 'block';
+    };
   }
 
   function backToHome() {
@@ -218,6 +244,8 @@
     document.getElementById('report-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
     document.getElementById('floatingBackBtn').style.display = 'none';
+    document.getElementById('loading-message').style.display = 'none';
+    document.getElementById('report-frame').style.display = 'none';
   }
 
   function getUnitTitle(unit) {
